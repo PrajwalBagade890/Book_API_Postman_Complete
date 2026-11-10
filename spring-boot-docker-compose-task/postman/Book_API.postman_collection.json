@@ -1,0 +1,201 @@
+{
+  "info": {
+    "_postman_id": "8a3e4c2d-9b31-4f72-a6d1-2f6a0b8c5e11",
+    "name": "Book API",
+    "description": "Automated CRUD tests for the Spring Boot Book API. Run requests in order using Collection Runner.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "bookId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. GET all books",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "pm.test(\"Response is a JSON array\", function () { const data = pm.response.json(); pm.expect(data).to.be.an(\"array\"); });",
+              "pm.test(\"Every returned book has expected fields\", function () { pm.response.json().forEach(function (book) { pm.expect(book).to.have.property(\"id\"); pm.expect(book.title).to.be.a(\"string\"); pm.expect(book.author).to.be.a(\"string\"); pm.expect(book.price).to.exist; }); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/books",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "books"
+          ]
+        }
+      }
+    },
+    {
+      "name": "2. POST create a book",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 201 Created\", function () { pm.response.to.have.status(201); });",
+              "const book = pm.response.json();",
+              "pm.test(\"Created book contains expected fields\", function () { pm.expect(book).to.have.property(\"id\"); pm.expect(book.title).to.eql(\"The Alchemist\"); pm.expect(book.author).to.eql(\"Paulo Coelho\"); pm.expect(Number(book.price)).to.eql(299); });",
+              "pm.collectionVariables.set(\"bookId\", book.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/books",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "books"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"The Alchemist\",\n  \"author\": \"Paulo Coelho\",\n  \"price\": 299.0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "3. GET book by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "const book = pm.response.json();",
+              "pm.test(\"Returned book matches the created book\", function () { pm.expect(String(book.id)).to.eql(String(pm.collectionVariables.get(\"bookId\"))); pm.expect(book.title).to.eql(\"The Alchemist\"); pm.expect(book.author).to.eql(\"Paulo Coelho\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/books/{{bookId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "books",
+            "{{bookId}}"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. PUT update book",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+              "const book = pm.response.json();",
+              "pm.test(\"Updated book has the new values\", function () { pm.expect(String(book.id)).to.eql(String(pm.collectionVariables.get(\"bookId\"))); pm.expect(book.title).to.eql(\"The Alchemist - Updated\"); pm.expect(book.author).to.eql(\"Paulo Coelho\"); pm.expect(Number(book.price)).to.eql(349); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/books/{{bookId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "books",
+            "{{bookId}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"The Alchemist - Updated\",\n  \"author\": \"Paulo Coelho\",\n  \"price\": 349.0\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "5. DELETE book",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status code is 204 No Content\", function () { pm.response.to.have.status(204); });",
+              "pm.test(\"Response body is empty\", function () { pm.expect(pm.response.text()).to.eql(\"\"); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/books/{{bookId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "books",
+            "{{bookId}}"
+          ]
+        }
+      }
+    }
+  ]
+}
